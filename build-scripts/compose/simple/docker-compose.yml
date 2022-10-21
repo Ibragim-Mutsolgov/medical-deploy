@@ -1,8 +1,29 @@
 version: '2.4'
 
 services:
+  rabbitmq:
+    hostname: 'rabbitmq'
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 20s
+      timeout: 10s
+      retries: 3
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    environment:
+      SERVER_PORT: 8080
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
   message-analyzer:
     image: application/message-analyzer:simple
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 20s
@@ -11,11 +32,13 @@ services:
     environment:
       SERVER_PORT: 8080
     ports:
-      - 8092:8080
+      - "8092:8080"
 
   medical-monitoring:
     image: application/medical-monitoring:simple
     depends_on:
+      rabbitmq:
+        condition: service_healthy
       message-analyzer:
         condition: service_healthy
     healthcheck:
@@ -26,11 +49,13 @@ services:
     environment:
       SERVER_PORT: 8080
     ports:
-      - 8093:8080
+      - "8093:8080"
 
   person-service:
     image: application/person-service:simple
     depends_on:
+      rabbitmq:
+        condition: service_healthy
       message-analyzer:
         condition: service_healthy
       medical-monitoring:
@@ -43,4 +68,4 @@ services:
     environment:
       SERVER_PORT: 8080
     ports:
-      - 8091:8080
+      - "8091:8080"

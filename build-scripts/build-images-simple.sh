@@ -42,11 +42,11 @@ function pull_or_clone_proj() {
  if cd ${SERVICE_NAME}
   then
  #  git branch -f master origin/master
-   git checkout master
+   git checkout hometask-5
    git pull
    cd ..
   else
-    git clone --branch master ${SERVICE_URL} ${SERVICE_NAME}
+    git clone --branch hometask-5 ${SERVICE_URL} ${SERVICE_NAME}
  fi
 }
 
@@ -54,10 +54,10 @@ function pull_or_clone_proj() {
 cd ..
 
 # Clone or update projects
-pull_or_clone_proj common-module https://github.com/stazhirovka2022/common-module.git
-pull_or_clone_proj medical-monitoring https://github.com/stazhirovka2022/medical-monitoring.git
-pull_or_clone_proj message-analyzer https://github.com/stazhirovka2022/message-analyzer.git
-pull_or_clone_proj person-service https://github.com/stazhirovka2022/person-service.git
+pull_or_clone_proj common-module https://github.com/Ibragim-Mutsolgov/common-module.git
+pull_or_clone_proj medical-monitoring https://github.com/Ibragim-Mutsolgov/medical-monitoring.git
+pull_or_clone_proj message-analyzer https://github.com/Ibragim-Mutsolgov/message-analyzer.git
+pull_or_clone_proj person-service https://github.com/Ibragim-Mutsolgov/person-service.git
 
 build_lib common-module
 build_jar medical-monitoring message-analyzer person-service
@@ -66,6 +66,6 @@ build_jar medical-monitoring message-analyzer person-service
 APP_VERSION=0.0.1-SNAPSHOT
 
 echo "Building Docker images"
-build_basic_images ./medical-monitoring/core/target/medical-monitoring-${APP_VERSION}.jar application/medical-monitoring
-build_basic_images ./message-analyzer/core/target/message-analyzer-${APP_VERSION}.jar application/message-analyzer
-build_basic_images ./person-service/core/target/person-service-${APP_VERSION}.jar application/person-service
+build_basic_images ./medical-monitoring/core/target/monitoring-core-${APP_VERSION}.jar application/medical-monitoring
+build_basic_images ./message-analyzer/core/target/analyzer-core-${APP_VERSION}.jar application/message-analyzer
+build_basic_images ./person-service/core/target/service-core-${APP_VERSION}.jar application/person-service
