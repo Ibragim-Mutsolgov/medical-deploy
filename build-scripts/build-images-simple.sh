@@ -42,11 +42,11 @@ function pull_or_clone_proj() {
  if cd ${SERVICE_NAME}
   then
  #  git branch -f master origin/master
-   git checkout hometask-5
+   git checkout hometask-6
    git pull
    cd ..
   else
-    git clone --branch hometask-5 ${SERVICE_URL} ${SERVICE_NAME}
+    git clone --branch hometask-6 ${SERVICE_URL} ${SERVICE_NAME}
  fi
 }
 

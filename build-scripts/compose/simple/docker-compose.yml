@@ -13,10 +13,61 @@ services:
       - "5672:5672"
       - "15672:15672"
 
+  postgres:
+    container_name: postgres
+    hostname: 'postgresql'
+    image: postgres
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U postgres -d medicine'" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    volumes:
+      - postgres:/data/postgres
+#    networks:
+#      - postgres
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    healthcheck:
+      test: ["CMD", "wget", "-O", "-", "http://localhost:80/misc/ping"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - postgres
+    restart: unless-stopped
+
   message-analyzer:
     image: application/message-analyzer:simple
     depends_on:
       rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      pgadmin:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
@@ -32,6 +83,10 @@ services:
     image: application/medical-monitoring:simple
     depends_on:
       rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      pgadmin:
         condition: service_healthy
       message-analyzer:
         condition: service_healthy
@@ -50,6 +105,10 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+      postgres:
+        condition: service_healthy
+      pgadmin:
+        condition: service_healthy
       message-analyzer:
         condition: service_healthy
       medical-monitoring:
@@ -63,3 +122,11 @@ services:
       SERVER_PORT: 8080
     ports:
       - "8091:8080"
+
+networks:
+  postgres:
+    driver: bridge
+
+volumes:
+  postgres:
+  pgadmin:
