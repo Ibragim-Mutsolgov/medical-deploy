@@ -15,7 +15,7 @@ services:
 
   postgres:
     container_name: postgres
-    hostname: 'postgresql'
+    hostname: 'postgres'
     image: postgres
     depends_on:
       rabbitmq:
@@ -31,7 +31,9 @@ services:
 #      - postgres
     ports:
       - 5432:5432
+    restart: always
     environment:
+      - POSTGRES_DB=medicine
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
 
